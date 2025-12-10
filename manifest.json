@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Protection Anti-Grab IP & Données",
+  "version": "2.0.0",
+  "description": "Protection complète contre les fuites d'IP, grab de données navigateur et fingerprinting",
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "privacy"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/scripts/content.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "background": {
+    "service_worker": "src/scripts/background.js"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "Protection Anti-Grab IP & Données 🛡️"
+  },
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "48": "src/icons/icon48.png",
+    "128": "src/icons/icon128.png"
+  }
+}

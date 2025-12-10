@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protection Anti-Grab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 350px;
+            min-height: 400px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 0;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #00ff99;
+            color: #000;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .stats-container {
+            padding: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff99;
+            text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .protections-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 12px;
+        }
+
+        .protections-list h3 {
+            font-size: 13px;
+            margin-bottom: 12px;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .protection-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .protection-item:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            color: #00ff99;
+            font-weight: bold;
+        }
+
+        .footer {
+            padding: 15px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .uptime {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 11px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status.active {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ Protection Anti-Grab</h1>
+        <span class="status active" id="status">ACTIF</span>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>🚨 Menaces Bloquées</h3>
+            <div class="stat-value" id="totalBlocked">0</div>
+            <div class="stat-label">Total depuis le démarrage</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="stat-card">
+                <h3>🔒 WebRTC/IP</h3>
+                <div class="stat-value" style="font-size: 24px;" id="webrtcBlocked">0</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>👁️ Fingerprint</h3>
+                <div class="stat-value" style="font-size: 24px;" id="fingerprintBlocked">0</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>🌐 Requêtes IP</h3>
+                <div class="stat-value" style="font-size: 24px;" id="requestsBlocked">0</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>💉 Injections</h3>
+                <div class="stat-value" style="font-size: 24px;" id="ipLeaksBlocked">0</div>
+            </div>
+        </div>
+
+        <div class="protections-list">
+            <h3>🔐 Protections Actives</h3>
+            <div class="protection-item">
+                <span class="check-icon">✓</span>
+                <span>WebRTC IP Leak</span>
+            </div>
+            <div class="protection-item">
+                <span class="check-icon">✓</span>
+                <span>Canvas Fingerprinting</span>
+            </div>
+            <div class="protection-item">
+                <span class="check-icon">✓</span>
+                <span>Navigator Spoofing</span>
+            </div>
+            <div class="protection-item">
+                <span class="check-icon">✓</span>
+                <span>Géolocalisation</span>
+            </div>
+            <div class="protection-item">
+                <span class="check-icon">✓</span>
+                <span>IP API Blocking</span>
+            </div>
+        </div>
+
+        <div class="uptime">
+            ⏱️ Temps actif: <span id="uptime">0s</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Protection maximale • Aucune fuite possible
+    </div>
+
+    <script src="scripts/popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Protection Anti-Grab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff99 0%, #00cc77 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px 10px 10px 0;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            color: #00ff99;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .warning {
+            color: #ffd93d;
+        }
+
+        .info {
+            color: #6bcfff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff99;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Test de Protection Anti-Grab</h1>
+
+        <div class="test-section">
+            <h2>📊 Statistiques de Protection</h2>
+            <button onclick="showStats()">Afficher les Stats</button>
+            <button onclick="testAll()">Lancer Tous les Tests</button>
+            <div id="stats-result" class="result" style="display: none;"></div>
+            <div id="stats-grid" class="stats-grid" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔒 Test WebRTC (Fuite IP)</h2>
+            <p>Ce test tente de créer une connexion WebRTC pour exposer votre IP réelle.</p>
+            <button onclick="testWebRTC()">Tester WebRTC</button>
+            <div id="webrtc-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 Test Requêtes IP API</h2>
+            <p>Tente de récupérer votre IP via des services externes.</p>
+            <button onclick="testIPAPI()">Tester IP APIs</button>
+            <div id="ipapi-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 Test Canvas Fingerprinting</h2>
+            <p>Tente de créer un fingerprint unique via Canvas.</p>
+            <button onclick="testCanvas()">Tester Canvas</button>
+            <div id="canvas-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🕵️ Test Navigator Fingerprinting</h2>
+            <p>Récupère les informations du navigateur pour vous identifier.</p>
+            <button onclick="testNavigator()">Tester Navigator</button>
+            <div id="navigator-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📍 Test Géolocalisation</h2>
+            <p>Tente d'accéder à votre position géographique.</p>
+            <button onclick="testGeolocation()">Tester Géolocalisation</button>
+            <div id="geo-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔋 Test Battery API</h2>
+            <p>Tente d'accéder aux informations de batterie.</p>
+            <button onclick="testBattery()">Tester Battery</button>
+            <div id="battery-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            element.innerHTML += `<div class="${className}">${message}</div>`;
+        }
+
+        function showStats() {
+            const statsResult = document.getElementById('stats-result');
+            const statsGrid = document.getElementById('stats-grid');
+            statsResult.innerHTML = '';
+            statsResult.style.display = 'block';
+            statsGrid.style.display = 'grid';
+            
+            if (typeof IPProtection !== 'undefined') {
+                const stats = IPProtection.getStats();
+                log('stats-result', '<span class="success">✅ Protection active!</span>', 'success');
+                log('stats-result', JSON.stringify(stats, null, 2), 'info');
+                
+                statsGrid.innerHTML = `
+                    <div class="stat-box">
+                        <div class="stat-value">${stats.webRTCBlocked}</div>
+                        <div class="stat-label">WebRTC Bloqués</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${stats.domBlocked}</div>
+                        <div class="stat-label">DOM Bloqués</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${stats.fingerprintAttempts}</div>
+                        <div class="stat-label">Fingerprinting</div>
+                    </div>
+                `;
+            } else {
+                log('stats-result', '<span class="error">❌ Extension non détectée! Installez l\'extension d\'abord.</span>', 'error');
+            }
+        }
+
+        function testWebRTC() {
+            const result = document.getElementById('webrtc-result');
+            result.innerHTML = '';
+            log('webrtc-result', '🔄 Test WebRTC en cours...', 'info');
+            
+            try {
+                const pc = new RTCPeerConnection({
+                    iceServers: [{urls: 'stun:stun.l.google.com:19302'}]
+                });
+                
+                let candidateCount = 0;
+                pc.onicecandidate = (e) => {
+                    if (e.candidate) {
+                        candidateCount++;
+                        log('webrtc-result', `Candidat détecté: ${e.candidate.candidate.substring(0, 50)}...`, 'warning');
+                    }
+                };
+                
+                pc.createDataChannel('test');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                
+                setTimeout(() => {
+                    if (candidateCount === 0) {
+                        log('webrtc-result', '<span class="success">✅ Aucun candidat exposé! Protection active.</span>', 'success');
+                    } else {
+                        log('webrtc-result', `<span class="warning">⚠️ ${candidateCount} candidats détectés (vérifiez s'ils sont srflx)</span>`, 'warning');
+                    }
+                    pc.close();
+                }, 3000);
+            } catch (e) {
+                log('webrtc-result', `<span class="success">✅ WebRTC bloqué: ${e.message}</span>`, 'success');
+            }
+        }
+
+        async function testIPAPI() {
+            const result = document.getElementById('ipapi-result');
+            result.innerHTML = '';
+            log('ipapi-result', '🔄 Test des APIs IP...', 'info');
+            
+            const apis = [
+                'https://api.ipify.org?format=json',
+                'https://ipapi.co/json/',
+                'https://ip-api.com/json/'
+            ];
+            
+            for (const api of apis) {
+                try {
+                    log('ipapi-result', `Tentative: ${api}`, 'info');
+                    const response = await fetch(api);
+                    const data = await response.json();
+                    log('ipapi-result', `<span class="error">❌ API non bloquée: ${JSON.stringify(data)}</span>`, 'error');
+                } catch (e) {
+                    log('ipapi-result', `<span class="success">✅ ${api} BLOQUÉE!</span>`, 'success');
+                }
+            }
+        }
+
+        function testCanvas() {
+            const result = document.getElementById('canvas-result');
+            result.innerHTML = '';
+            log('canvas-result', '🔄 Test Canvas Fingerprinting...', 'info');
+            
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('Test fingerprint', 2, 2);
+                
+                const hash1 = canvas.toDataURL();
+                const hash2 = canvas.toDataURL();
+                
+                log('canvas-result', `Hash 1: ${hash1.substring(0, 50)}...`, 'info');
+                log('canvas-result', `Hash 2: ${hash2.substring(0, 50)}...`, 'info');
+                
+                if (hash1 === hash2) {
+                    log('canvas-result', '<span class="warning">⚠️ Canvas stable (fingerprinting possible)</span>', 'warning');
+                } else {
+                    log('canvas-result', '<span class="success">✅ Canvas modifié (protection active!)</span>', 'success');
+                }
+            } catch (e) {
+                log('canvas-result', `<span class="success">✅ Canvas bloqué: ${e.message}</span>`, 'success');
+            }
+        }
+
+        function testNavigator() {
+            const result = document.getElementById('navigator-result');
+            result.innerHTML = '';
+            log('navigator-result', '🔄 Test Navigator Fingerprinting...', 'info');
+            
+            const info = {
+                platform: navigator.platform,
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                languages: navigator.languages,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory,
+                plugins: navigator.plugins.length,
+                screen: {
+                    width: screen.width,
+                    height: screen.height,
+                    colorDepth: screen.colorDepth
+                }
+            };
+            
+            log('navigator-result', JSON.stringify(info, null, 2), 'info');
+            
+            if (info.platform === 'Win32' && info.hardwareConcurrency === 4) {
+                log('navigator-result', '<span class="success">✅ Navigator spoofer actif (valeurs génériques)</span>', 'success');
+            } else {
+                log('navigator-result', '<span class="warning">⚠️ Informations réelles exposées</span>', 'warning');
+            }
+        }
+
+        function testGeolocation() {
+            const result = document.getElementById('geo-result');
+            result.innerHTML = '';
+            log('geo-result', '🔄 Test Géolocalisation...', 'info');
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        log('geo-result', `<span class="error">❌ Position exposée: ${position.coords.latitude}, ${position.coords.longitude}</span>`, 'error');
+                    },
+                    (error) => {
+                        log('geo-result', `<span class="success">✅ Géolocalisation bloquée: ${error.message}</span>`, 'success');
+                    }
+                );
+            } else {
+                log('geo-result', '<span class="success">✅ API Géolocalisation non disponible</span>', 'success');
+            }
+        }
+
+        async function testBattery() {
+            const result = document.getElementById('battery-result');
+            result.innerHTML = '';
+            log('battery-result', '🔄 Test Battery API...', 'info');
+            
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    log('battery-result', `<span class="error">❌ Battery info exposée: ${battery.level * 100}%</span>`, 'error');
+                } catch (e) {
+                    log('battery-result', `<span class="success">✅ Battery API bloquée: ${e.message}</span>`, 'success');
+                }
+            } else {
+                log('battery-result', '<span class="success">✅ Battery API non disponible</span>', 'success');
+            }
+        }
+
+        function testAll() {
+            showStats();
+            setTimeout(testWebRTC, 500);
+            setTimeout(testIPAPI, 1000);
+            setTimeout(testCanvas, 4000);
+            setTimeout(testNavigator, 4500);
+            setTimeout(testGeolocation, 5000);
+            setTimeout(testBattery, 5500);
+        }
+
+        // Afficher les stats au chargement
+        window.addEventListener('load', () => {
+            setTimeout(showStats, 500);
+        });
+    </script>
+</body>
+</html>
